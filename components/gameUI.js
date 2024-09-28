@@ -297,119 +297,12 @@ export default function GameUI({ singlePlayerRound, setSinglePlayerRound, showDi
     }
   }, [gameOptions?.location])
   function guess() {
-    setShowAnswer(true)
-    if(showCountryButtons || setShowCountryButtons)setShowCountryButtons(false);
-    if(onboarding) {
-      setOnboarding((prev) => {
-
-        return {
-          ...prev,
-          nextRoundTime:0,
-          points: (prev.points??0) + (countryGuesser?2500:calcPoints({ lat: latLong.lat, lon: latLong.long, guessLat: pinPoint.lat, guessLon: pinPoint.lng, usedHint: hintShown, maxDist: 20000}))
-        }
-      })
-      setTimeToNextRound(0)
-    }
-
-    if(singlePlayerRound) {
-      setSinglePlayerRound((prev) => {
-        return {
-          ...prev,
-          locations: [...prev.locations, {lat: latLong.lat, long: latLong.long, guessLat: pinPoint.lat, guessLong: pinPoint.lng,
-            points: calcPoints({ lat: latLong.lat, lon: latLong.long, guessLat: pinPoint.lat, guessLon: pinPoint.lng, usedHint: hintShown, maxDist: gameOptions.maxDist })
-
-          }],
-          lastPoint: calcPoints({ lat: latLong.lat, lon: latLong.long, guessLat: pinPoint.lat, guessLon: pinPoint.lng, usedHint: hintShown, maxDist: gameOptions.maxDist })
-        }
-      })
-    }
-
-    if(multiplayerState?.inGame) return;
-
-    if(xpEarned > 0 && session?.token?.secret && gameOptions.official) {
-      fetch('/api/storeGame', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          secret: session.token.secret,
-          lat: pinPoint.lat,
-          long: pinPoint.lng,
-          usedHint: hintShown,
-          actualLat: latLong.lat,
-          actualLong: latLong.long,
-          maxDist: gameOptions.maxDist,
-          roundTime: Math.round((Date.now() - roundStartTime)/ 1000)
-        })
-      }).then(res => res.json()).then(data => {
-        if(data.error) {
-          console.error(data.error);
-          return;
-        }
-      }).catch(e => {
-        console.error(e);
-      });
-    }
-
-    if(gameOptions.location === 'all' && pinPoint) {
-    findCountry({ lat: pinPoint.lat, lon: pinPoint.lng }).then((country) => {
-
-      setLostCountryStreak(0);
-      if(country === latLong.country) {
-        setCountryStreak(countryStreak + 1);
-        setShowStreakAdBanner(false);
-      } else {
-        setCountryStreak(0);
-        setLostCountryStreak(countryStreak);
-
-        if(countryStreak > 0 && window.adBreak && !inCrazyGames) {
-        console.log("requesting reward ad")
-        window.adBreak({
-          type: 'reward',  // rewarded ad
-          name: 'reward-continue',
-          beforeReward: (showAdFn) => {
-            window.showRewardedAdFn = () => { showAdFn();
-              sendEvent('reward_ad_play', { countryStreak });
-              };
-            // Rewarded ad available - prompt user for a rewarded ad
-            setShowStreakAdBanner(true);
-            sendEvent('reward_ad_available', { countryStreak });
-            console.log("reward ad available")
-          },
-          beforeAd: () => { },     // You may also want to mute the game's sound.
-          adDismissed: () => {
-            toast.error(text("adDismissed"));
-            sendEvent('reward_ad_dismissed', { countryStreak });
-          },
-          adViewed: () => {
-            setCountryStreak(countryStreak);
-            setLostCountryStreak(0);
-            toast.success(text("streakRestored"));
-            sendEvent('reward_ad_viewed', { countryStreak });
-          },       // Reward granted - continue game at current score.
-          afterAd: () => { setShowStreakAdBanner(false) },       // Resume the game flow.
-        });
-      }
-      }
-    });
-    }
+    alert("Guess button pressed")
   }
 
-  useEffect(() => {
-    if(!latLong || !pinPoint || multiplayerState?.inGame || !gameOptions?.official) return;
-    setXpEarned(Math.round(calcPoints({ lat: latLong.lat, lon: latLong.long, guessLat: pinPoint.lat, guessLon: pinPoint.lng, usedHint: hintShown, maxDist: gameOptions.maxDist }) / 50))
-  }, [km, latLong, pinPoint])
 
 
-  useEffect(() => {
-    const int= setInterval(() => {
-      fixBranding();
-    },500)
-    return () => {
-      clearInterval(int)
-    }
-  },[])
+
 
 
 
@@ -419,11 +312,7 @@ export default function GameUI({ singlePlayerRound, setSinglePlayerRound, showDi
   return (
     <div className="gameUI">
 
-{ !onboarding && !inCrazyGames && (
-    <div className={`topAdFixed ${(multiplayerTimerShown || onboardingTimerShown || singlePlayerRound)?'moreDown':''}`}>
-    <Ad inCrazyGames={inCrazyGames} showAdvertisementText={false} screenH={height} types={[[320, 50],[728,90]]} centerOnOverflow={600} screenW={Math.max(400, width-450)} vertThresh={0.3} />
-    </div>
-)}
+
 
 {/*
 

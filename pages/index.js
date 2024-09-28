@@ -1422,28 +1422,7 @@ setShowCountryButtons(false)
 </div>
 
 
-{screen === "home" && !mapModal && (
-        <div className="home__footer">
-          <div className="footer_btns">
-        { !isApp && (
-                  <>
-                  { !inCrazyGames && (
-                    <>
-                <Link target="_blank" href={"https://discord.gg/ubdJHjKtrC"}><button className="home__squarebtn gameBtn discord" aria-label="Discord"><FaDiscord className="home__squarebtnicon" /></button></Link>
-                <Link target="_blank" href={"https://www.youtube.com/@worldguessr?sub_confirmation=1"}><button className="home__squarebtn gameBtn youtube" aria-label="Youtube"><FaYoutube className="home__squarebtnicon" /></button></Link>
-                <Link target="_blank" href={"https://github.com/codergautam/worldguessr"}><button className="home__squarebtn gameBtn" aria-label="Github"><FaGithub className="home__squarebtnicon" /></button></Link>
-                </>
-                )}
-                <Link href={"/leaderboard"+(inCrazyGames ? "?crazygames": "")}>
 
-                <button className="home__squarebtn gameBtn" aria-label="Leaderboard"><FaRankingStar className="home__squarebtnicon" /></button></Link>
-                </>
-                )}
-
-                <button className="home__squarebtn gameBtn" aria-label="Settings" onClick={() => setSettingsModal(true)}><FaGear className="home__squarebtnicon" /></button>
-                </div>
-        </div>
-        )}
 
 <div style={{
         top: 0,
@@ -1497,7 +1476,7 @@ setShowCountryButtons(false)
         <BannerText text={`${text("loading")}...`} shown={loading} showCompass={true} />
 
 
-       
+
         <Navbar inCrazyGames={inCrazyGames} loading={loading} onFriendsPress={()=>setFriendsModal(true)} loginQueued={loginQueued} setLoginQueued={setLoginQueued} inGame={multiplayerState?.inGame || screen === "singleplayer"} openAccountModal={() => setAccountModalOpen(true)} session={session} shown={true} reloadBtnPressed={reloadBtnPressed} backBtnPressed={backBtnPressed} setGameOptionsModalShown={setGameOptionsModalShown} onNavbarPress={() => onNavbarLogoPress()} gameOptions={gameOptions} screen={screen} multiplayerState={multiplayerState} />
 
 
@@ -1513,7 +1492,7 @@ setShowCountryButtons(false)
 
           <div className="home__ui">
             { onboardingCompleted && (
-            <h1 className="home__title">WorldGuessr</h1>
+            <h1 className="home__title">JM Geoguessr</h1>
             )}
 
             <div className="home__btns">
@@ -1551,9 +1530,7 @@ setShowCountryButtons(false)
                 )}
                 <button className="home__squarebtn gameBtn" aria-label="Settings" onClick={() => setSettingsModal(true)}><FaGear className="home__squarebtnicon" /></button>
  */}
- { !inCrazyGames && (
-                <button className="homeBtn" aria-label="Community Maps" onClick={()=>setMapModal(true)}>{text("communityMaps")}</button>
- )}
+
                 </div>
 
               </>
@@ -1561,11 +1538,7 @@ setShowCountryButtons(false)
             </div>
 
           <div style={{ marginTop: "20px" }}>
-            <center>
-              { !loading && screen === "home"  && (
-    <Ad inCrazyGames={inCrazyGames} screenH={height} types={[[320, 50],[728,90],[970,90],[970,250]]} screenW={width} />
-              )}
-    </center>
+
             </div>
           </div>
           </>
@@ -1641,99 +1614,6 @@ setShowCountryButtons(false)
 
         <Script>
           {`
-
-            window.lastAdShown = Date.now();
-            window.gameOpen = Date.now();
-          //   try {
-          //   if(window.localStorage.getItem("lastAdShown")) {
-          //     window.lastAdShown = parseInt(window.localStorage.getItem("lastAdShown"))
-          // }
-          //   } catch(e) {}
-            window.adInterval = 1800000;
-
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "ndud94nvsg");
-
-  console.log("Ads by adinplay!")
-  	window.aiptag = window.aiptag || {cmd: []};
-	aiptag.cmd.display = aiptag.cmd.display || [];
-	aiptag.cmd.player = aiptag.cmd.player || [];
-
-	//CMP tool settings
-	aiptag.cmp = {
-		show: true,
-		position: "centered",  //centered, bottom
-		button: true,
-		buttonText: "Privacy settings",
-		buttonPosition: "bottom-left" //bottom-left, bottom-right, bottom-center, top-left, top-right
-	}
-   window.adsbygoogle = window.adsbygoogle || [];
-  window.adBreak = adConfig = function(o) {adsbygoogle.push(o);}
-   adConfig({preloadAdBreaks: 'on'});
-
-   aiptag.cmd.player.push(function() {
-	aiptag.adplayer = new aipPlayer({
-		AD_WIDTH: Math.min(Math.max(window.innerWidth, 300), 1066),
-		AD_HEIGHT: Math.min(Math.max(window.innerHeight, 150), 600),
-		AD_DISPLAY: 'modal-center', //default, fullscreen, fill, center, modal-center
-		LOADING_TEXT: 'loading advertisement',
-		PREROLL_ELEM: function(){ return document.getElementById('videoad'); },
-		AIP_COMPLETE: function (state) {
-  document.querySelector('.videoAdParent').classList.add('hidden');
-
-    console.log("Ad complete", state)
-			// The callback will be executed once the video ad is completed.
-      window.lastAdShown = Date.now();
-      try {
-      window.localStorage.setItem("lastAdShown", window.lastAdShown)
-    } catch(e) {}
-
-
-			if (typeof aiptag.adplayer.adCompleteCallback === 'function') {
-				aiptag.adplayer.adCompleteCallback(state);
-			}
-		}
-	});
-});
-
-window.show_videoad = function(callback) {
-// if in crazygame (window.inCrazyGames) dont show ads
-if(window.inCrazyGames) {
-  console.log("In crazygames, not showing ads")
-  callback("DISABLED");
-  return;
-}
-
-          if(window.disableVideoAds) {
-          console.log("Video ads disabled")
-            callback("DISABLED");
-            return;
-          }
-
-  if(window.lastAdShown + window.adInterval > Date.now()) {
-            callback("COOLDOWN");
-            return;
-          }
-
-	// Assign the callback to be executed when the ad is done
-	aiptag.adplayer.adCompleteCallback = callback;
-
-	// Check if the adslib is loaded correctly or blocked by adblockers etc.
-	if (typeof aiptag.adplayer !== 'undefined') {
-  console.log("Showing ad")
-  // remove 'hidden' class from the parent div
-  document.querySelector('.videoAdParent').classList.remove('hidden');
-		aiptag.cmd.player.push(function() { aiptag.adplayer.startVideoAd(); });
-	} else {
-   console.log("Adlib not loaded")
-		// Adlib didn't load; this could be due to an ad blocker, timeout, etc.
-		// Please add your script here that starts the content, this usually is the same script as added in AIP_COMPLETE.
-		aiptag.adplayer.aipConfig.AIP_COMPLETE();
-	}
-}
 
   `}
         </Script>
