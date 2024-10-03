@@ -16,7 +16,6 @@ import ol, { DoubleClickZoom, KeyboardZoom, MouseWheelZoom } from 'ol/interactio
 import { Zoom } from 'ol/control';
 import { Circle } from 'ol/geom';
 import { useTranslation } from 'react-i18next';
-import sendEvent from './utils/sendEvent';
 import { boundingExtent } from 'ol/extent';
 const hintMul = 5000000 / 20000; //5000000 for all countries (20,000 km)
 
@@ -31,7 +30,6 @@ const MapComponent = ({ options, ws, session, pinPoint, setPinPoint, answerShown
 
   useEffect(() => {
     console.log("loading map");
-    sendEvent('mapLoad');
   }, []);
 
   function placeExtent(extent) {
