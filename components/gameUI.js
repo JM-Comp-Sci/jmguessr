@@ -8,9 +8,9 @@ import { toast } from "react-toastify"; // toast lib
 import RoundOverScreen from "./roundOverScreen"; // screen that shows the round is over (5 games played)
 import useWindowDimensions from "./useWindowDimensions";
 
-const MapWidget = dynamic(() => import("../components/Map"), { ssr: false });
 
-export default function GameUI({ singlePlayerRound, setSinglePlayerRound, hintShown, setHintShown, pinPoint, setPinPoint, showAnswer, setShowAnswer, loading, setLoading, latLong, loadLocation }) {
+
+export default function GameUI({ singlePlayerRound, setSinglePlayerRound, hintShown, setHintShown, pinPoint, setPinPoint, showAnswer, setShowAnswer, loading, setLoading, latLong, loadLocation, miniMapShown, setMiniMapShown }) {
   const { t: text } = useTranslation("common");
   const {width, height} = useWindowDimensions();
 
@@ -20,10 +20,11 @@ export default function GameUI({ singlePlayerRound, setSinglePlayerRound, hintSh
     isTouchScreen = true;
   }
 
-  const [miniMapShown, setMiniMapShown] = useState(false) // whether the minimap is shown
+
   const [miniMapExpanded, setMiniMapExpanded] = useState(false) // whether the minimap is expanded
   const [miniMapFullscreen, setMiniMapFullscreen] = useState(false) // whether the minimap is fullscreen (after guessing)
   const [mapPinned, setMapPinned] = useState(false); // whether the map is pinned to the screen
+  const [groundMap, setgroundMap] = useState("First");
 
   // dist between guess & target
   const [km, setKm] = useState(null);
@@ -48,18 +49,6 @@ export default function GameUI({ singlePlayerRound, setSinglePlayerRound, hintSh
       document.removeEventListener('keydown', keydown);
     }
   }, [pinPoint, showAnswer, singlePlayerRound])
-
-  useEffect(() => {
-    // type of minimap based on screen size
-    // mobile: can be fully minimized for maximum screen space
-    // desktop: always shown in the corner
-
-    if (!loading && latLong && width > 600 && !isTouchScreen) {
-      setMiniMapShown(true)
-    } else {
-      setMiniMapShown(false)
-    }
-  }, [loading, latLong, width])
 
 
   useEffect(() => {
@@ -116,9 +105,43 @@ onHomePress={() =>{
           }}>
             <FaThumbtack style={{ transform: mapPinned ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
           </button>
+
+  <button className="cornerBtn"
+    style={{color: groundMap === "Ground" ? "blue" : "black"}}
+onClick={() => {
+  setgroundMap("Ground")
+  }}>
+    G
+  </button>
+  &nbsp;  &nbsp;
+  &nbsp;
+
+
+  <button className="cornerBtn" 
+    style={{color: groundMap === "First" ? "blue" : "black"}}
+    onClick={() => {
+  setgroundMap("First")
+  }}>
+    1
+  </button>
+  &nbsp;  &nbsp;
+  &nbsp;
+
+  <button className="cornerBtn"
+    style={{color: groundMap === "Second" ? "blue" : "black"}}
+
+    onClick={() => {
+  setgroundMap("Second")
+  }}>
+    2
+  </button>
         </div>
 )}
-        {latLong && !loading && <MapWidget focused={miniMapExpanded}  answerShown={showAnswer} showHint={hintShown} pinPoint={pinPoint} setPinPoint={setPinPoint} guessed={false} guessing={false} location={latLong} setKm={setKm} />}
+
+
+        { ((width > 600) || (width <= 600 && miniMapShown)) && (
+          <img src={`/maps/${groundMap}.png`} alt="Map" className="map" style={{width: "100%", height: "100%", objectFit: "contain", userSelect: 'none', zIndex: 5, backgroundColor: 'white'}} />
+  )}
 
 
         {/* Desktop hint&guess btn */}

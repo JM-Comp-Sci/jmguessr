@@ -21,6 +21,7 @@ import BannerText from "@/components/bannerText"; // full-screen text that fills
 const jockey = Jockey_One({ subsets: ['latin'], weight: "400", style: 'normal' });
 
 export default function Home({ }) {
+  const [miniMapShown, setMiniMapShown] = useState(false) // whether the minimap is shown
   // defining "states" our site can be in
   const [screen, setScreen] = useState("home"); // what mode we are in. can be ['home', 'singleplayer']
   const [loading, setLoading] = useState(false); // set this to true if we are loading something
@@ -63,7 +64,7 @@ export default function Home({ }) {
 
   function loadLocation() {
     if (loading) return; // dont load a new location if we are already loading smth
-
+    setMiniMapShown(false)
     alert("loadLocation")
   }
 
@@ -85,17 +86,16 @@ export default function Home({ }) {
         width: '100vw',
         height: '100vh',
         transition: 'opacity 0.5s',
-        opacity: 0.4,
+        opacity: 1,
         userSelect: 'none',
         WebkitUserSelect: 'none',
         MozUserSelect: 'none',
         msUserSelect: 'none',
         pointerEvents: 'none',
       }}>
-        <NextImage.default src={'/street1.jpg'}
+        <NextImage.default src={'/Main-background.jpg'}
           draggable={false}
           fill alt="Game Background" style={{ objectFit: "cover", userSelect: 'none' }}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       </div>
 
@@ -120,7 +120,7 @@ export default function Home({ }) {
                 {/* play button */}
                 <button className="homeBtn" onClick={() => {
                   if (!loading) setScreen("singleplayer")
-                }} >{text("singleplayer")}</button>
+                }} >Play now</button>
 
               </div>
             </div>
@@ -130,7 +130,7 @@ export default function Home({ }) {
 
         {/* singleplayer game content */}
         {screen === "singleplayer" && <div className="home__singleplayer">
-          <GameUI singlePlayerRound={singlePlayerRound} setSinglePlayerRound={setSinglePlayerRound} hintShown={hintShown} setHintShown={setHintShown} pinPoint={pinPoint} setPinPoint={setPinPoint} showAnswer={showAnswer} setShowAnswer={setShowAnswer} loading={loading} setLoading={setLoading} latLong={latLong} loadLocation={loadLocation} />
+          <GameUI singlePlayerRound={singlePlayerRound} setSinglePlayerRound={setSinglePlayerRound} hintShown={hintShown} setHintShown={setHintShown} pinPoint={pinPoint} setPinPoint={setPinPoint} showAnswer={showAnswer} setShowAnswer={setShowAnswer} loading={loading} setLoading={setLoading} latLong={latLong} loadLocation={loadLocation} miniMapShown={miniMapShown} setMiniMapShown={setMiniMapShown} />
         </div>}
       </main>
     </>
