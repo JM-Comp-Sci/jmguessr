@@ -35,7 +35,9 @@ export default function MarkPaid() {
 
   return (
     <div className="container">
-      <h1>Mark User as Paid</h1>
+      <h1 style={{color: 'black'}}
+      >JMGuessr - Mark a student as paid</h1>
+
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="firstName">First Name</label>
@@ -67,7 +69,7 @@ export default function MarkPaid() {
             required
           />
         </div>
-        <button type="submit">Submit</button>
+        <button type="submit">Mark Paid</button>
       </form>
       {message && <p>{message}</p>}
       <style jsx>{`
