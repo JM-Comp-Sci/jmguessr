@@ -1,84 +1,118 @@
-// importing everything we need
-
-import React from "react";
-import { useEffect, useState, useRef } from "react"; // core react hooks
-import NextImage from "next/image"; // <img> tag in nextjs
-
-import HeadContent from "@/components/headContent"; // html <head> content
-import { Jockey_One } from 'next/font/google'; // fonts (we can change this later)
-import 'react-responsive-modal/styles.css'; // modal css
-import { toast, ToastContainer } from "react-toastify"; // toast (top right notifications)
-import 'react-toastify/dist/ReactToastify.css'; // toast css
-import { useTranslation } from 'next-i18next' // translation lib (only english, other locales not added)
+import React, { useEffect, useState } from "react";
+import NextImage from "next/image";
+import HeadContent from "@/components/headContent";
+import { Jockey_One } from 'next/font/google';
+import 'react-responsive-modal/styles.css';
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
-// custom components
-import Navbar from "@/components/ui/navbar"; // navigation bar at the top
-import GameUI from "@/components/gameUI"; // core game ui
-import BannerText from "@/components/bannerText"; // full-screen text that fills up the page (eg. Loading..)
+import Navbar from "@/components/ui/navbar";
+import GameUI from "@/components/gameUI";
+import BannerText from "@/components/bannerText";
+import Login from "@/components/Login";
 
 // initialize the fonts we want to use
 const jockey = Jockey_One({ subsets: ['latin'], weight: "400", style: 'normal' });
 
 export default function Home({ }) {
-  const [miniMapShown, setMiniMapShown] = useState(false) // whether the minimap is shown
-  // defining "states" our site can be in
-  const [screen, setScreen] = useState("home"); // what mode we are in. can be ['home', 'singleplayer']
-  const [loading, setLoading] = useState(false); // set this to true if we are loading something
+  const [screen, setScreen] = useState("home");
+  const [loading, setLoading] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [timeRemaining, setTimeRemaining] = useState(null);
 
-  const [latLong, setLatLong] = useState({ lat: 0, long: 0 }) // current location to be guessed. needs to be reworked, we need a coordinate system for the school
-  const [showAnswer, setShowAnswer] = useState(false) // whether the user is guessing (false) or they pressed guess and answer is shown (true)
+  const { t: text } = useTranslation("common");
 
-  const [pinPoint, setPinPoint] = useState(null) // where the user has their pin.
-  const [hintShown, setHintShown] = useState(false) // if a hint is shown
-
-  const [singlePlayerRound, setSinglePlayerRound] = useState(null); // data about the current game (total points / 25000, locations, etc)
-
-  // old translation system
-  const { t: text } = useTranslation("common"); // used like text('key') to get the translation
-
-  // when user presses the worldguessr logo
-  function onNavbarLogoPress() {
-  }
-
-  // when user presses reload btn
-  function reloadBtnPressed() {
-
-  }
-
-  // when user presses red back btn
-  function backBtnPressed() {
-    if (loading) setLoading(false); // if we are loading, stop loading
-
-    if (screen === "singleplayer") { // if we are in singleplayer mode
-      // reset the game
-      setScreen("home")
-      setPinPoint(null)
-      setLatLong(null)
-      setShowAnswer(false)
-      setHintShown(false)
-      setSinglePlayerRound(null)
+  // Fetch user data by secret from localStorage
+  useEffect(() => {
+    const secret = localStorage.getItem('secret');
+    if (secret) {
+      fetchUserData(secret);
     }
-  }
+  }, []);
 
+  useEffect(() => {
+    if (userData) {
+      const interval = setInterval(() => {
+        calculateTimeRemaining();
+      }, 1000);
 
-  function loadLocation() {
-    if (loading) return; // dont load a new location if we are already loading smth
-    setMiniMapShown(false)
-    alert("loadLocation")
-  }
+      return () => clearInterval(interval);
+    }
+  }, [userData]);
 
+  const fetchUserData = async (secret) => {
+    try {
+      const response = await fetch(`/api/getuserbysecret?secret=${secret}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+      const data = await response.json();
+      setUserData(data.user);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      toast.error('Error fetching user data.');
+    }
+  };
 
-  // return what to render on the page (in JSX). we use {/* */} to comment in jsx
+  const calculateTimeRemaining = () => {
+    // Set the target time (Dec 9th at 1 PM CST)
+    const targetDate = new Date('2024-12-09T13:00:00-06:00'); // CST is UTC-6
+    const currentTime = new Date();
+
+    // Calculate the remaining time in milliseconds
+    const remainingTime = targetDate - currentTime;
+
+    if (remainingTime <= 0) {
+      setTimeRemaining("The competition has started!");
+    } else {
+      const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+      setTimeRemaining(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+
+    }
+  };
+
+  const handleLogin = async (data) => {
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Login failed:', errorData.error);
+        toast.error(`Login failed: ${errorData.error}`);
+        return;
+      }
+
+      const userData = await response.json();
+      localStorage.setItem('secret', userData.user.secret);
+      setUserData(userData.user);
+      setScreen("home");
+    } catch (error) {
+      console.error('An error occurred during login:', error);
+      toast.error('An error occurred. Please try again.');
+    }
+  };
+
+  const backBtnPressed = () => {
+    setScreen("home");
+    setUserData(null);
+  };
+
   return (
     <>
-      {/* <head> tag */}
       <HeadContent text={text} />
-
-      {/* automatic container for any notifications (should we choose to use them) */}
       <ToastContainer />
 
-      {/* background image */}
       <div style={{
         top: 0,
         left: 0,
@@ -88,62 +122,80 @@ export default function Home({ }) {
         transition: 'opacity 0.5s',
         opacity: 1,
         userSelect: 'none',
-        WebkitUserSelect: 'none',
-        MozUserSelect: 'none',
-        msUserSelect: 'none',
         pointerEvents: 'none',
       }}>
-        <NextImage.default src={'/Main-background.jpg'}
-          draggable={false}
-          fill alt="Game Background" style={{ objectFit: "cover", userSelect: 'none' }}
-        />
+        <NextImage.default src={'/Main-background.jpg'} draggable={false} fill alt="Game Background" style={{ objectFit: "cover", userSelect: 'none' }} />
       </div>
 
-
-      {/* main content, including fonts here */}
       <main className={`home ${jockey.className}`} id="main">
-
-        {/* big loading text in case loading state is true */}
         <BannerText text={`${text("loading")}...`} shown={loading} showCompass={true} />
 
-        {/* navigation bar at the top */}
-        <Navbar loading={loading} shown={true} reloadBtnPressed={reloadBtnPressed} backBtnPressed={backBtnPressed}  onNavbarPress={onNavbarLogoPress} screen={screen} />
+        <Navbar loading={loading} shown={true} backBtnPressed={backBtnPressed} screen={screen} />
 
-        {/* home page content */}
-        <div className={`home__content ${screen !== "home" ? "hidden" : ""}`}>
+        <div className={`home__content ${(screen !== "home" || userData)
+          ? "hidden" : ""}`}>
           <div className="home__ui">
-            <h1 className="home__title">JM Geoguessr</h1>
+            <h1 className="home__title">JMGuessr</h1>
+            <p className="home__subtitle">How well do you know JM?</p>
 
             <div className="home__btns">
               <div className={`mainHomeBtns`}>
-
-                {/* play button */}
-                <button className="homeBtn" onClick={() => {
-                  if (!loading) setScreen("singleplayer")
-                }} >Play now</button>
-
+                <button className="homeBtn" onClick={() => setScreen("login")}>
+                  Enter the Competition
+                </button>
               </div>
             </div>
           </div>
         </div>
 
+        {screen === "login" && <Login onLogin={handleLogin} />}
 
-        {/* singleplayer game content */}
+        {/* Display Hello User screen when logged in */}
+        {screen === "home" && userData && (
+          <div className="loggedInScreen">
+            <div className="loggedInContent">
+              <center>
+              <h1>Welcome, {userData.firstName}!</h1>
+              <h2>Competiton begins in {timeRemaining}</h2>
+              <br/>
+              <p><i>JMGuessr</i> is guessing game where you try to guess the location of photos taken inside JM on a map.</p>
+              <p>The first round will start on Dec 9th at 1 oclock.</p>
+              <br/>
+              <p>Make sure to pay $1 to the office before then!</p>
+              <p style={{
+                color: userData.paid ? "green" : "red",
+              }}>Status: {userData.paid ? "Paid" : "Not Paid"}</p>
+              <br/>
+
+              <h3>Study the maps</h3>
+              <a style={{ color: "cyan" }}
+               href="/maps/ground.png" target="_blank" rel="noreferrer">Ground Floor Map</a>
+              <br/>
+              <a
+style={{ color: "cyan" }}
+              href="/maps/first.png" target="_blank" rel="noreferrer">First Floor Map</a>
+              <br/>
+              <a style={{ color: "cyan" }}
+              href="/maps/second.png" target="_blank" rel="noreferrer">Second Floor Map</a>
+              </center>
+            </div>
+          </div>
+        )}
+
+        {/* Singleplayer game content */}
         {screen === "singleplayer" && <div className="home__singleplayer">
-          <GameUI singlePlayerRound={singlePlayerRound} setSinglePlayerRound={setSinglePlayerRound} hintShown={hintShown} setHintShown={setHintShown} pinPoint={pinPoint} setPinPoint={setPinPoint} showAnswer={showAnswer} setShowAnswer={setShowAnswer} loading={loading} setLoading={setLoading} latLong={latLong} loadLocation={loadLocation} miniMapShown={miniMapShown} setMiniMapShown={setMiniMapShown} />
+          <GameUI />
         </div>}
       </main>
     </>
-  )
+  );
 }
 
-// ignore this, its part of the old translation system
+// ignore this, part of old translation system
 export async function getStaticProps({ locale }) {
   return {
     props: {
-      ...(await serverSideTranslations(locale, [
-        'common',
-      ])),
+      ...(await serverSideTranslations(locale, ['common'])),
     },
-  }
+  };
 }
