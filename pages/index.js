@@ -169,14 +169,14 @@ export default function Home({ }) {
 
               <h3>Study the maps</h3>
               <a style={{ color: "cyan" }}
-               href="/maps/ground.png" target="_blank" rel="noreferrer">Ground Floor Map</a>
+               href="/ground.png" target="_blank" rel="noreferrer">Ground Floor Map</a>
               <br/>
               <a
 style={{ color: "cyan" }}
-              href="/maps/first.png" target="_blank" rel="noreferrer">First Floor Map</a>
+              href="/first.png" target="_blank" rel="noreferrer">First Floor Map</a>
               <br/>
               <a style={{ color: "cyan" }}
-              href="/maps/second.png" target="_blank" rel="noreferrer">Second Floor Map</a>
+              href="/second.png" target="_blank" rel="noreferrer">Second Floor Map</a>
               </center>
             </div>
           </div>
