@@ -161,7 +161,7 @@ export default function Home({ }) {
               <p><i>JMGuessr</i> is guessing game where you try to guess the location of photos taken inside JM on a map.</p>
               <p>The first round will start on Dec 9th at 1 oclock.</p>
               <br/>
-              <p>Make sure to pay $1 to the office before then!</p>
+              <p>Make sure to pay $1 to the office or Gautam before then! Can take up to a day to update.</p>
               <p style={{
                 color: userData.paid ? "green" : "red",
               }}>Status: {userData.paid ? "Paid" : "Not Paid"}</p>
