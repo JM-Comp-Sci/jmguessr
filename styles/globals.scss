@@ -54,6 +54,7 @@ button {
   height: 100vh;
   padding: 0 20px;
   transform: translate(-50%);
+  width: 100%;
   // slowly move to right while fading out when is hidden
   transition: left 0.5s, opacity 0.5s;
   overflow-y: auto;
