@@ -58,7 +58,7 @@ export default function Home({ }) {
 
   const calculateTimeRemaining = () => {
     // Set the target time (Dec 9th at 1 PM CST)
-    const targetDate = new Date('2024-12-09T13:00:00-06:00'); // CST is UTC-6
+    const targetDate = new Date('2024-12-13T13:00:00-06:00'); // CST is UTC-6
     const currentTime = new Date();
 
     // Calculate the remaining time in milliseconds
@@ -159,12 +159,7 @@ export default function Home({ }) {
               <h2>Competiton begins in {timeRemaining}</h2>
               <br/>
               <p><i>JMGuessr</i> is guessing game where you try to guess the location of photos taken inside JM on a map.</p>
-              <p>The first round will start on Dec 9th at 1 oclock.</p>
-              <br/>
-              <p>Make sure to pay $1 to the office or Gautam before then! Can take up to a day to update.</p>
-              <p style={{
-                color: userData.paid ? "green" : "red",
-              }}>Status: {userData.paid ? "Paid" : "Not Paid"}</p>
+              <p>Unfortunately, we had to postpone the game to Fri, Dec 13th at 1 oclock.</p>
               <br/>
 
               <h3>Study the maps</h3>
