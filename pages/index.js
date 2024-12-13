@@ -12,7 +12,7 @@ import Navbar from "@/components/ui/navbar";
 import GameUI from "@/components/gameUI";
 import BannerText from "@/components/bannerText";
 import Login from "@/components/Login";
-
+import locs from "@/public/locs.json"
 // initialize the fonts we want to use
 const jockey = Jockey_One({ subsets: ['latin'], weight: "400", style: 'normal' });
 
@@ -58,7 +58,12 @@ export default function Home({ }) {
 
   const calculateTimeRemaining = () => {
     // Set the target time (Dec 9th at 1 PM CST)
-    const targetDate = new Date('2024-12-09T13:00:00-06:00'); // CST is UTC-6
+    const target = locs.find(loc => new Date(loc.unlock) > new Date());
+    if(!target) {
+      setTimeRemaining(null);
+      return;
+    }
+    const targetDate = new Date(target.unlock);
     const currentTime = new Date();
 
     // Calculate the remaining time in milliseconds
@@ -105,8 +110,13 @@ export default function Home({ }) {
 
   const backBtnPressed = () => {
     setScreen("home");
-    setUserData(null);
   };
+
+  const playLevel = (loc) => {
+    setScreen("singleplayer");
+    localStorage.setItem('loc', JSON.stringify(loc));
+  }
+
 
   return (
     <>
@@ -156,27 +166,36 @@ export default function Home({ }) {
             <div className="loggedInContent">
               <center>
               <h1>Welcome, {userData.firstName}!</h1>
-              <h2>Competiton begins in {timeRemaining}</h2>
+              { timeRemaining && (
+              <h2>Next round in {timeRemaining}</h2>
+              ) }
               <br/>
               <p><i>JMGuessr</i> is guessing game where you try to guess the location of photos taken inside JM on a map.</p>
-              <p>The first round will start on Dec 9th at 1 oclock.</p>
               <br/>
-              <p>Make sure to pay $1 to the office or Gautam before then! Can take up to a day to update.</p>
-              <p style={{
-                color: userData.paid ? "green" : "red",
-              }}>Status: {userData.paid ? "Paid" : "Not Paid"}</p>
+              { userData.paid && <p style={{
+                color: "yellow",
+              }}>You are in the leaderboard!</p> }
+
               <br/>
 
-              <h3>Study the maps</h3>
-              <a style={{ color: "cyan" }}
-               href="/ground.png" target="_blank" rel="noreferrer">Ground Floor</a>
-              <br/>
-              <a
-style={{ color: "cyan" }}
-              href="/first.png" target="_blank" rel="noreferrer">First Floor</a>
-              <br/>
-              <a style={{ color: "cyan" }}
-              href="/second.png" target="_blank" rel="noreferrer">Second Floor</a>
+              <div class="container">
+
+  {locs.map((loc, index) => (
+    <button key={index} class="button" style={{
+    backgroundColor: new Date(loc.unlock) < new Date() ? "cyan" : "gray",
+    cursor: new Date(loc.unlock) < new Date() ? "pointer" : "not-allowed",
+    }}
+    onClick={() => {
+      playLevel(loc);
+    }}>
+      {loc.id}
+    </button>
+  ))}
+
+</div>
+
+
+
               </center>
             </div>
           </div>

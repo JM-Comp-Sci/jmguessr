@@ -19,11 +19,6 @@ export default function Navbar({ shown, backBtnPressed, reloadBtnPressed, onNavb
       <button className="gameBtn navBtn backBtn mobile" onClick={backBtnPressed} style={{width: "50px"}}><FaArrowLeft /></button>
       </div>
 
-
-      {reloadBtn && (
-      <button className="gameBtn navBtn backBtn" style={{backgroundColor: '#000099'}} onClick={reloadBtnPressed}><FaArrowRotateRight /></button>
-      )}
-
     </div>
 )}
     </>

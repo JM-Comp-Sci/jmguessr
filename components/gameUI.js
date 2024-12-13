@@ -1,190 +1,188 @@
-import { useEffect, useState } from "react" // core react imports
-import dynamic from "next/dynamic"; // dynamic import for map
-import { FaMap } from "react-icons/fa"; // map icon
-import EndBanner from "./endBanner"; // end banner that shows distance, points, etc
-import { FaExpand, FaMinimize, FaThumbtack } from "react-icons/fa6"; // map control icons
-import { useTranslation } from 'next-i18next' // translation lib (only english, other locales not added)
-import { toast } from "react-toastify"; // toast lib
-import RoundOverScreen from "./roundOverScreen"; // screen that shows the round is over (5 games played)
-import useWindowDimensions from "./useWindowDimensions";
+import { useState } from "react";
+
+export default function GameUI({ loc }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [marker, setMarker] = useState(null);  // Allow only one marker
+
+  const handleMapClick = (e) => {
+
+    const rect = e.target.getBoundingClientRect();
+    const xPx = e.clientX - rect.left;
+    const yPx = e.clientY - rect.top;
+    const percentX = (xPx / rect.width) * 100;
+    const percentY = (yPx / rect.height) * 100;
+    setMarker({
+      x: xPx+35,
+      y: yPx+85,
+      percentX,
+      percentY,
+    });
+
+    console.log(`Clicked at ${percentX}%, ${percentY}%`);
 
 
-
-export default function GameUI({ singlePlayerRound, setSinglePlayerRound, hintShown, setHintShown, pinPoint, setPinPoint, showAnswer, setShowAnswer, loading, setLoading, latLong, loadLocation, miniMapShown, setMiniMapShown }) {
-  const { t: text } = useTranslation("common");
-  const {width, height} = useWindowDimensions();
-
-  // how to determine if touch screen?
-  let isTouchScreen = false;
-  if(window.matchMedia("(pointer: coarse)").matches) {
-    isTouchScreen = true;
-  }
-
-
-  const [miniMapExpanded, setMiniMapExpanded] = useState(false) // whether the minimap is expanded
-  const [miniMapFullscreen, setMiniMapFullscreen] = useState(false) // whether the minimap is fullscreen (after guessing)
-  const [mapPinned, setMapPinned] = useState(false); // whether the map is pinned to the screen
-  const [groundMap, setgroundMap] = useState("First");
-
-  // dist between guess & target
-  const [km, setKm] = useState(null);
-
-  function showHint() {
-    alert("Hint button pressed")
-    setHintShown(true)
-  }
-
-  function guess() {
-    alert("Guess button pressed")
-  }
-
-  useEffect(() => {
-    function keydown(e) {
-        if(e.key === " ") {
-          alert("Space pressed")
-        }
-    }
-    document.addEventListener('keydown', keydown);
-    return () => {
-      document.removeEventListener('keydown', keydown);
-    }
-  }, [pinPoint, showAnswer, singlePlayerRound])
-
-
-  useEffect(() => {
-    // reset the game when it's over
-    loadLocation()
-    if(singlePlayerRound) {
-      setSinglePlayerRound({
-        round: 1,
-        totalRounds: 5,
-        locations: []
-      })
-    }
-  }, [])
-
+  };
 
   return (
-    <div className="gameUI">
-
-{/*  round over screen when 5 rounds are played */}
-{ singlePlayerRound?.done && (
-<RoundOverScreen points={singlePlayerRound.locations.reduce((acc, cur) => acc + cur.points, 0)}
-maxPoints={25000}
-history={singlePlayerRound.locations}
-buttonText={text("playAgain")}
-onHomePress={() =>{
-  alert("Home button pressed")
-              }}/>
-)}
-        <>
-
-
-      <div id="miniMapArea" onMouseEnter={() => {
-        setMiniMapExpanded(true)
-      }} onMouseLeave={() => {
-        if(mapPinned) return;
-        setMiniMapExpanded(false)
-      }} className={`miniMap ${miniMapExpanded ? 'mapExpanded' : ''}
-      shown ${showAnswer ? 'answerShown' : 'answerNotShown'} ${miniMapFullscreen&&miniMapExpanded ? 'fullscreen' : ''}`}>
-
-{!showAnswer && (
-<div className="mapCornerBtns desktop" style={{ visibility: miniMapExpanded ? 'visible' : 'hidden' }}>
-          <button className="cornerBtn" onClick={() => {
-            setMiniMapFullscreen(!miniMapFullscreen)
-            if(!miniMapFullscreen) {
-              setMiniMapExpanded(true)
-            }
-          }}>{miniMapFullscreen  ? (
-            <FaMinimize />
-          ) : (
-            <FaExpand />
-          )}</button>
-          <button className="cornerBtn" onClick={() => {
-            setMapPinned(!mapPinned)
-          }}>
-            <FaThumbtack style={{ transform: mapPinned ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
-          </button>
-
-  <button className="cornerBtn"
-    style={{color: groundMap === "Ground" ? "blue" : "black"}}
-onClick={() => {
-  setgroundMap("Ground")
-  }}>
-    G
-  </button>
-  &nbsp;  &nbsp;
-  &nbsp;
-
-
-  <button className="cornerBtn" 
-    style={{color: groundMap === "First" ? "blue" : "black"}}
-    onClick={() => {
-  setgroundMap("First")
-  }}>
-    1
-  </button>
-  &nbsp;  &nbsp;
-  &nbsp;
-
-  <button className="cornerBtn"
-    style={{color: groundMap === "Second" ? "blue" : "black"}}
-
-    onClick={() => {
-  setgroundMap("Second")
-  }}>
-    2
-  </button>
-        </div>
-)}
-
-
-        { ((width > 600) || (width <= 600 && miniMapShown)) && (
-          <img src={`/maps/${groundMap}.png`} alt="Map" className="map" style={{width: "100%", height: "100%", objectFit: "contain", userSelect: 'none', zIndex: 5, backgroundColor: 'white'}} />
-  )}
-
-
-        {/* Desktop hint&guess btn */}
-        <div className={`miniMap__btns ${showAnswer ? 'answerShownBtns' : ''}`}>
-        <button className={`miniMap__btn guessBtn `} onClick={guess}>{text('guess')}</button>
-
-          <button className={`miniMap__btn hintBtn ${hintShown ? 'hintShown' : ''}`} onClick={showHint}>{text('hint')}</button>
-        </div>
+    <>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: '100vw',
+          height: '100vh',
+          overflow: 'hidden',
+          position: 'relative',
+        }}
+      >
+        <img
+          src={"/first.png"}
+          alt="Game"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+          }}
+        />
+        <button
+          onClick={() => setIsModalOpen(true)}
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            width: '80%',
+            padding: '1rem',
+            fontSize: '1.5rem',
+            backgroundColor: '#007bff',
+            color: '#fff',
+            border: 'none',
+            cursor: 'pointer',
+            borderRadius: '8px',
+            margin: '0 auto',
+            display: 'block',
+          }}
+        >
+          Start Guessing
+        </button>
       </div>
 
-      {/* guess and hint for mobile  */}
-      <div className={`mobile_minimap__btns ${miniMapShown ? 'miniMapShown' : ''} ${(showAnswer||singlePlayerRound?.done) ? 'answerShownBtns' : ''}`}>
-        {miniMapShown && (
-          <>
-            <button className={`miniMap__btn guessBtn `} onClick={guess}>{text('guess')}</button>
-          <button className={`miniMap__btn hintBtn ${hintShown ? 'hintShown' : ''}`} onClick={showHint}>{text('hint')}</button>
-          </>
-        )}
-        <button className={`gameBtn ${miniMapShown ? 'mobileMiniMapExpandedToggle' : ''}`} onClick={() => {
-          setMiniMapShown(!miniMapShown)
-        }}><FaMap size={miniMapShown ? 30 : 50} /></button>
-      </div>
-      </>
+      {isModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000,
+          }}
+        >
 
-        {
-          singlePlayerRound && !singlePlayerRound?.done && (
-            <span className="timer shown">
-              {text("round", {r: singlePlayerRound.round, mr: singlePlayerRound.totalRounds})} -  {singlePlayerRound.locations.reduce((acc, cur) => acc + cur.points, 0)} {text("points")}
+          <div
+            style={{
+              backgroundColor: '#fff',
+              padding: '2rem',
+              borderRadius: '12px',
+              maxWidth: '90%',
+              textAlign: 'center',
+              position: 'relative',
+              width: '80%',
+              height: '80%',
+            }}
+          >
+                    <h1 style={{ color: '#000', fontSize: '2rem', marginBottom: '1rem' }}>
+            Guess the location
+          </h1>
+            <div
+              style={{
+                width: '100%',
+                height: '66vh',
+                maxWidth: '1000px',
+                maxHeight: '1000px',
 
-            </span>
-          )
-        }
+              }}
+            >
+              <div style={{
+                // display: 'flex',
+                // justifyContent: 'center',
+                // alignItems: 'center',
+                // width: '100%',
+                // height: '100%',
+              }}>
+              <img
+              src="/ground.png"
+              alt="Map"
+              style={{
+                width: '100%',
+                objectFit: 'contain',
+              }}
+              onClick={handleMapClick}
+            />
+            </div>
+          {marker && (
+            <div
+              style={{
+                position: 'absolute',
+                top: marker.y,
+                left: marker.x,
+                transform: 'translate(-50%, -50%)',
+              }}
+            >
+              <img
+                src="/src.png"
+                alt="Marker"
+                style={{
+                  width: '30px',
+                  height: '30px',
+                  objectFit: 'contain',
+                }}
+              />
+            </div>
+          )}
 
-<div className="endCards">
+            </div>
+            <div style={{ position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)' }}>
+              {marker && <button
+                style={{
+                  padding: '0.75rem 2rem',
+                  backgroundColor: '#28a745',
+                  color: '#fff',
+                  border: 'none',
+                  cursor: 'pointer',
+                  borderRadius: '6px',
+                  fontSize: '1.2rem',
+                  paddingLeft: '2rem',
+                  paddingRight: '2rem',
 
-<EndBanner singlePlayerRound={singlePlayerRound} usedHint={hintShown}  guessed={showAnswer} latLong={latLong} pinPoint={pinPoint} fullReset={()=>{
-  loadLocationFunc()
-
-  }} km={km}  toggleMap={() => {
-    alert("Toggle map")
-  }}  />
-  </div>
-
-    </div>
-  )
+                }}
+              >
+                Submit
+              </button>}
+              &nbsp;&nbsp;
+              <button
+                onClick={() => setIsModalOpen(false)}
+                style={{
+                  padding: '0.75rem 2rem',
+                  backgroundColor: '#dc3545',
+                  color: '#fff',
+                  border: 'none',
+                  cursor: 'pointer',
+                  borderRadius: '6px',
+                  fontSize: '1.2rem',
+                  paddingLeft: '2rem',
+                  paddingRight: '2rem',
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
