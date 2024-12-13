@@ -64,6 +64,7 @@ export default function Home({ }) {
       return;
     }
     const targetDate = new Date(target.unlock);
+    const targetDate = new Date('2024-12-13T13:00:00-06:00'); // CST is UTC-6
     const currentTime = new Date();
 
     // Calculate the remaining time in milliseconds
@@ -171,11 +172,15 @@ export default function Home({ }) {
               ) }
               <br/>
               <p><i>JMGuessr</i> is guessing game where you try to guess the location of photos taken inside JM on a map.</p>
+<<<<<<< HEAD
               <br/>
               { userData.paid && <p style={{
                 color: "yellow",
               }}>You are in the leaderboard!</p> }
 
+=======
+              <p>Unfortunately, we had to postpone the game to Fri, Dec 13th at 1 oclock.</p>
+>>>>>>> 5c8a45e55ac34d0e6a67b8be34a264bd6546ce85
               <br/>
 
               <div class="container">
