@@ -178,6 +178,9 @@ export default function Home({ }) {
               ) }
               <br/>
               <p><i>JMGuessr</i> is guessing game where you try to guess the location of photos taken inside JM on a map.</p>
+
+              <a style={{color: 'gold'}} href="/leaderboard">View the leaderboard</a>
+              <br/>
               <br/>
 
 

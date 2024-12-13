@@ -17,6 +17,7 @@ export default function Leaderboard() {
     <center>
       <h1 style={{ color: 'black' }}
       >Leaderboard</h1>
+      <a href='/'>Home</a>
       <br/>
       <table>
         <thead>
