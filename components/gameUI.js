@@ -1,10 +1,21 @@
-import { useState } from "react";
+import { useState,useRef } from "react";
 
-export default function GameUI({ loc }) {
+export default function GameUI({ loc,setShowAnswer, showAnswer }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [marker, setMarker] = useState(null);  // Allow only one marker
 
+  const [pointsEarned, setPointsEarned] = useState(0);
+
+  const mapRef = useRef(null);
+  function percenttopx(percentX, percentY) {
+    const rect = mapRef.current.getBoundingClientRect();
+    const xPx = (percentX / 100) * rect.width;
+    const yPx = (percentY / 100) * rect.height;
+    return { x: xPx+35, y: yPx+20 };
+  }
+
   const handleMapClick = (e) => {
+    if(showAnswer) return;
 
     const rect = e.target.getBoundingClientRect();
     const xPx = e.clientX - rect.left;
@@ -13,7 +24,7 @@ export default function GameUI({ loc }) {
     const percentY = (yPx / rect.height) * 100;
     setMarker({
       x: xPx+35,
-      y: yPx+85,
+      y: yPx+20,
       percentX,
       percentY,
     });
@@ -37,7 +48,7 @@ export default function GameUI({ loc }) {
         }}
       >
         <img
-          src={"/first.png"}
+          src={`/${loc.id}.png`}
           alt="Game"
           style={{
             width: '100%',
@@ -91,12 +102,20 @@ export default function GameUI({ loc }) {
               textAlign: 'center',
               position: 'relative',
               width: '80%',
-              height: '80%',
+              height: '100%',
             }}
           >
-                    <h1 style={{ color: '#000', fontSize: '2rem', marginBottom: '1rem' }}>
-            Guess the location
+            { !showAnswer &&
+                    <h1 style={{ color: '#000', fontSize: '1.3rem', marginBottom: '1rem', position: 'fixed', top: '0rem', left: '50%', transform: 'translateX(-50%)', pointerEvents: 'none' }}>
+            Guess the location ({loc.floor} floor)
           </h1>
+}
+
+{ showAnswer &&
+                    <h1 style={{ color: '#000', fontSize: '2rem', marginBottom: '1rem', position: 'fixed', top: '0rem', left: '50%', transform: 'translateX(-50%)', pointerEvents: 'none' }}>
+            You got {pointsEarned} points!
+            </h1>
+}
             <div
               style={{
                 width: '100%',
@@ -114,7 +133,8 @@ export default function GameUI({ loc }) {
                 // height: '100%',
               }}>
               <img
-              src="/ground.png"
+              ref={mapRef}
+              src={`/${loc.floor}.png`}
               alt="Map"
               style={{
                 width: '100%',
@@ -139,14 +159,65 @@ export default function GameUI({ loc }) {
                   width: '30px',
                   height: '30px',
                   objectFit: 'contain',
+                  pointerEvents: 'none',
                 }}
               />
             </div>
           )}
+          {showAnswer && (
+                 <div
+                 style={{
+                   position: 'absolute',
+                   top: percenttopx(loc.x, loc.y).y,
+                    left: percenttopx(loc.x, loc.y).x,
+                   transform: 'translate(-50%, -50%)',
+                 }}
+               >
+                 <img
+                   src="/dest.png"
+                   alt="Marker"
+                   style={{
+                     width: '30px',
+                     height: '30px',
+                     objectFit: 'contain',
+                     pointerEvents: 'none',
+                   }}
+                 />
+               </div>
+             )}
 
             </div>
             <div style={{ position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)' }}>
-              {marker && <button
+              {marker && !showAnswer && <button
+              onClick={ () => {
+
+                setShowAnswer(true);
+fetch('/api/submit', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    locId: loc.id,
+                    x: marker.percentX,
+                    y: marker.percentY,
+                    secret: localStorage.getItem('secret'),
+                  }),
+                }).then(async (res) => {
+                  if (!res.ok) {
+                    const data = await res.json();
+                    console.error('Error submitting:', data.error);
+                    alert(`Error submitting: ${data.error}`);
+                    return;
+                  }
+
+                  const data = await res.json();
+                  setPointsEarned(data.points);
+                });
+
+
+              }}
+
                 style={{
                   padding: '0.75rem 2rem',
                   backgroundColor: '#28a745',
@@ -164,7 +235,11 @@ export default function GameUI({ loc }) {
               </button>}
               &nbsp;&nbsp;
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => {
+                  if(showAnswer) window.location.reload();
+                  else
+                  setIsModalOpen(false)
+                }}
                 style={{
                   padding: '0.75rem 2rem',
                   backgroundColor: '#dc3545',

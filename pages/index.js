@@ -21,6 +21,8 @@ export default function Home({ }) {
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const [timeRemaining, setTimeRemaining] = useState(null);
+  const [levelData, setLevelData] = useState(null);
+  const [showAnswer, setShowAnswer] = useState(false);
 
   const { t: text } = useTranslation("common");
 
@@ -64,7 +66,6 @@ export default function Home({ }) {
       return;
     }
     const targetDate = new Date(target.unlock);
-    const targetDate = new Date('2024-12-13T13:00:00-06:00'); // CST is UTC-6
     const currentTime = new Date();
 
     // Calculate the remaining time in milliseconds
@@ -111,10 +112,12 @@ export default function Home({ }) {
 
   const backBtnPressed = () => {
     setScreen("home");
+    setLevelData(null);
   };
 
   const playLevel = (loc) => {
     setScreen("singleplayer");
+    setLevelData(loc);
     localStorage.setItem('loc', JSON.stringify(loc));
   }
 
@@ -167,37 +170,44 @@ export default function Home({ }) {
             <div className="loggedInContent">
               <center>
               <h1>Welcome, {userData.firstName}!</h1>
+              <h2>
+                You have {userData.points} points
+              </h2>
               { timeRemaining && (
               <h2>Next round in {timeRemaining}</h2>
               ) }
               <br/>
               <p><i>JMGuessr</i> is guessing game where you try to guess the location of photos taken inside JM on a map.</p>
-<<<<<<< HEAD
               <br/>
-              { userData.paid && <p style={{
-                color: "yellow",
-              }}>You are in the leaderboard!</p> }
 
-=======
-              <p>Unfortunately, we had to postpone the game to Fri, Dec 13th at 1 oclock.</p>
->>>>>>> 5c8a45e55ac34d0e6a67b8be34a264bd6546ce85
-              <br/>
 
               <div class="container">
 
   {locs.map((loc, index) => (
     <button key={index} class="button" style={{
-    backgroundColor: new Date(loc.unlock) < new Date() ? "cyan" : "gray",
+    backgroundColor: new Date(loc.unlock) < new Date() ?
+    userData.history.length >= loc.id && userData.history[loc.id-1] !== null ?
+    "green" :
+    "gold" : "gray",
     cursor: new Date(loc.unlock) < new Date() ? "pointer" : "not-allowed",
     }}
     onClick={() => {
+      if(new Date(loc.unlock) > new Date()) {
+        toast.error("This level is not unlocked yet.");
+        return;
+      }
+      // check if user has already played this level
+      if(userData.history.length >= loc.id && userData.history[loc.id-1] !== null) {
+        toast.error("You have already played this location.");
+        return;
+      }
       playLevel(loc);
     }}>
       {loc.id}
     </button>
   ))}
-
 </div>
+
 
 
 
@@ -208,7 +218,10 @@ export default function Home({ }) {
 
         {/* Singleplayer game content */}
         {screen === "singleplayer" && <div className="home__singleplayer">
-          <GameUI />
+          <GameUI
+          showAnswer={showAnswer}
+          setShowAnswer={setShowAnswer}
+             loc={levelData} backBtnPressed={backBtnPressed} />
         </div>}
       </main>
     </>
