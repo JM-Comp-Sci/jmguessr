@@ -4,9 +4,9 @@ import MapPlays from '@/models/MapPlays';
 import User from '@/models/User';
 import locs from '../../public/locs.json';
 function checkIfCorrect(x,y,correctX,correctY){
-  //distance radius within 20
+  //distance radius within 5
   const dist = Math.sqrt((x-correctX)**2 + (y-correctY)**2);
-  return dist<=20;
+  return dist<=5;
 
 }
 
